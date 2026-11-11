@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Downloaded and derived microdata (regenerate with scripts/)
+data/raw/pums/
+data/interim/
