@@ -40,9 +40,11 @@ OUTPUT = INTERIM_DIR / "pums_person_pilot.parquet"
 # HICOV: health insurance coverage (1 = covered, 2 = not covered).
 # POVPIP: income-to-poverty ratio, in percent (0-501).
 # ST: state FIPS. AGEP: age. PWGTP and PWGTP1-80: person and replicate weights.
-KEEP_COLUMNS = ["ST", "AGEP", "HICOV", "POVPIP", "PWGTP"] + [
-    f"PWGTP{i}" for i in range(1, 81)
-]
+REQUIRED_COLUMNS = ["ST", "AGEP", "HICOV", "POVPIP", "PWGTP"]
+# Replicate weights are needed for design-based standard errors. Some early years
+# (2008 among them) do not include them, so their absence is recorded, not fatal.
+REPLICATE_COLUMNS = [f"PWGTP{i}" for i in range(1, 81)]
+KEEP_COLUMNS = REQUIRED_COLUMNS + REPLICATE_COLUMNS
 
 
 def zip_url(year: int, abbr: str) -> str:
@@ -120,11 +122,30 @@ def read_person_file(zip_path: Path, year: int) -> pd.DataFrame:
                 parts.append(pd.read_csv(f, usecols=lambda c: c in KEEP_COLUMNS, dtype={"ST": str}))
 
     df = pd.concat(parts, ignore_index=True)
-    missing = [c for c in KEEP_COLUMNS if c not in df.columns]
-    if missing:
-        raise KeyError(f"{year} {zip_path.name} is missing columns: {missing}")
-    df = df[KEEP_COLUMNS]
+    missing_required = [c for c in REQUIRED_COLUMNS if c not in df.columns]
+    if missing_required:
+        raise KeyError(f"{year} {zip_path.name} is missing columns: {missing_required}")
+
+    missing_replicate = [c for c in REPLICATE_COLUMNS if c not in df.columns]
+    if missing_replicate:
+        print(f"[warn] {year} {zip_path.name}: no replicate weights; standard errors "
+              "for this year need a different method")
+        for c in missing_replicate:
+            df[c] = pd.NA
+
+    df = df[KEEP_COLUMNS].copy()
+
+    # Some years store blank spaces in numeric fields, which makes pandas read the
+    # column as text. Coerce to numbers and report how many values became missing.
+    for col in ["AGEP", "HICOV", "POVPIP"] + REPLICATE_COLUMNS + ["PWGTP"]:
+        before_missing = df[col].isna().sum()
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+        new_missing = int(df[col].isna().sum() - before_missing)
+        if new_missing:
+            print(f"[clean] {year} {col}: {new_missing} non-numeric values set to missing")
+
     df.insert(0, "year", year)
+    df["has_replicate_weights"] = not missing_replicate
     return df
 
 
