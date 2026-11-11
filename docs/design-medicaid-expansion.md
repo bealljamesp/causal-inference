@@ -28,7 +28,7 @@ Expansion was a state-level decision. Some states adopted it in 2014 and others 
 
 - The analysis covers the 50 states and DC, 2008 to 2019, except Wisconsin.
 - Wisconsin is excluded because its 2014 ACS file could not be downloaded from the Census site. 2014 is the first post-expansion year, so this gap falls exactly where the estimate is measured. Excluding Wisconsin from every year keeps the panel balanced. The leave-one-out robustness check shows whether the estimate depends on it.
-- The 2008 files have no replicate weights. Those state-years keep their point estimates, but their standard errors need a different method.
+- All 600 state-years have replicate-weight standard errors. They range from about 0.004 to 0.037, with the largest in the smallest states (for example, SD and WY in 2008), where samples run 400 to 800 records.
 
 ## Outcome
 
@@ -58,6 +58,27 @@ Replace Post_t with event-time indicators (years relative to 2014) and plot the 
 3. Placebo test: assign a fake expansion year (for example, 2010) and confirm the estimate is near zero.
 4. Vary the income cutoff (for example, 100% and 200% of the poverty line).
 
+## Results (provisional)
+
+Status: estimates from the current pipeline. The treated and comparison lists are not yet verified against KFF or the CMS tracker, so treat these as provisional until that check is done.
+
+**Sample.** 43 states: 27 treated (2014 expansion) and 16 comparison. ACS 1-year PUMS, 2008 to 2019 excluding 2020, Wisconsin excluded. Adults 19 to 64 with income-to-poverty ratio at or below 138%. The outcome is the weighted share of these adults with no coverage, so it runs from 0 to 1.
+
+**Main estimate.** Weighted two-way fixed effects DiD, state-clustered standard errors:
+
+- Coefficient on Treated x Post: −0.071, meaning a 7.1 percentage point drop in the uninsured share (95% CI −0.106 to −0.037; cluster-robust SE 0.0175, t = −4.06).
+- Wild cluster bootstrap p-value: 0.0008 (Rademacher weights by state, B = 9,999). This is the primary inference, because 43 clusters is a modest number for asymptotic standard errors.
+- Asymptotic normal p-value: 0.0001, reported for comparison.
+- Replicate-weight SE: 0.0016. This captures ACS sampling noise only, not within-state correlation over time, so it is much smaller than the cluster SE and is not used for inference.
+
+**Event study.** Pre-period coefficients (2008 to 2012, relative to 2013) are jointly indistinguishable from zero (Wald test p = 0.572). Post-2014 coefficients show the decline. The event-study coefficients have not yet been bootstrapped.
+
+**Robustness.**
+
+- Leave-one-state-out: estimates range from −0.058 to −0.080.
+- Dropping DC: −0.072.
+- Placebo expansion in 2010 (pre-2014 data only): −0.007 (95% CI −0.020 to 0.007).
+
 ## What would change the conclusion
 
 - Pre-trends that diverge: the parallel-trends assumption is in doubt and the estimate should not be read causally.
@@ -70,6 +91,8 @@ Replace Post_t with event-time indicators (years relative to 2014) and plot the 
 - The ACS measures coverage at a point in time through self-report, which has known measurement error.
 - Spillovers into non-expansion states (for example, from cross-border enrollment) would bias the estimate toward zero.
 - The ACA Marketplace launched alongside expansion, so the estimate captures both policies, not Medicaid expansion alone.
+- Inference depends on how many states are clustered. With 43 clusters, the bootstrap p-value is the more defensible number; the asymptotic p-value is about eight times smaller.
+- Wisconsin is excluded because its 2014 file was unavailable. The leave-one-out check covers its absence only indirectly.
 
 ## Deliverables
 
