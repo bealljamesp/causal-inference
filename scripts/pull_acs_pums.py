@@ -100,9 +100,13 @@ def record_manifest(path: Path, url: str) -> None:
 
 
 def download(year: int, abbr: str) -> Path:
+    """Return a valid cached zip, re-downloading it if the cached copy is corrupt."""
     dest = raw_path(year, abbr)
     if dest.exists():
-        return dest
+        if zipfile.is_zipfile(dest):
+            return dest
+        dest.unlink()  # partial download or error page saved as .zip
+
     url = zip_url(year, abbr)
     dest.parent.mkdir(parents=True, exist_ok=True)
     with requests.get(url, stream=True, timeout=180) as response:
@@ -110,6 +114,10 @@ def download(year: int, abbr: str) -> Path:
         with dest.open("wb") as f:
             for chunk in response.iter_content(chunk_size=1 << 20):
                 f.write(chunk)
+
+    if not zipfile.is_zipfile(dest):
+        dest.unlink()
+        raise zipfile.BadZipFile(f"download from {url} is not a zip file")
     record_manifest(dest, url)
     return dest
 
@@ -127,7 +135,12 @@ def read_person_file(zip_path: Path, year: int, abbr: str, fips: str) -> pd.Data
         for member in person_members(zf):
             with zf.open(member) as f:
                 parts.append(
-                    pd.read_csv(f, usecols=lambda c: c in KEEP_COLUMNS, dtype={"ST": str})
+                    pd.read_csv(
+                        f,
+                        usecols=lambda c: c in KEEP_COLUMNS,
+                        dtype={"ST": str},
+                        low_memory=False,
+                    )
                 )
     df = pd.concat(parts, ignore_index=True)
 
