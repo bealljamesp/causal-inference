@@ -1,6 +1,7 @@
 """Difference-in-differences and event study: Medicaid expansion and uninsurance.
 
-Groups (verify both lists against KFF or the CMS expansion tracker before results):
+Groups (checked against KFF's Status of State Medicaid Expansion Decisions table,
+August 2026 version, kff.org/medicaid/issue-brief/status-of-state-medicaid-expansion-decisions-interactive-map/):
 - Treated: states that expanded in 2014, plus DC.
 - Comparison: states that had not expanded by the end of 2019.
 - Excluded: states that expanded in 2015-2019 (their timing changes the treatment).
@@ -29,6 +30,9 @@ import statsmodels.api as sm  # noqa: E402
 RATES = Path("data/interim/state_year_rates.csv")
 OUT_DIR = Path("data/output")
 
+# Source: KFF Status of State Medicaid Expansion Decisions (August 2026 table).
+# Treated: 2014 implementation dates (MI 4/1/2014 and NH 8/15/2014 included).
+# Comparison: never expanded through 2019, or expanded 2020 or later (ID, NE, UT, MO, OK, NC, SD).
 TREATED = {
     "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "HI", "IL", "IA", "KY", "MD", "MA",
     "MI", "MN", "NV", "NH", "NJ", "NM", "NY", "ND", "OH", "OR", "RI", "VT", "WA", "WV",
