@@ -220,3 +220,7 @@ __marimo__/
 # Downloaded and derived microdata (regenerate with scripts/)
 data/raw/pums/
 data/interim/
+data/output/
+
+# notes
+notes/
