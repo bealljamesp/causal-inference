@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
-import io
+import re
 import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
@@ -99,20 +99,31 @@ def record_manifest(path: Path, url: str) -> None:
         )
 
 
-def read_person_file(zip_path: Path, fips: str, year: int) -> pd.DataFrame:
-    """Read the person file from a zip and keep the columns the design needs."""
-    member = f"psam_p{fips}.csv"
+PERSON_MEMBER = re.compile(r"(psam_p|ss\d{2}p)[a-z0-9]*\.csv$", re.IGNORECASE)
+
+
+def person_members(zf: zipfile.ZipFile) -> list[str]:
+    """Person-file CSVs inside a zip. Naming changed across years (psam_p04.csv,
+    ss08paz.csv, etc.), and some years split the file into a and b parts."""
+    members = sorted(n for n in zf.namelist() if PERSON_MEMBER.search(n))
+    if not members:
+        raise FileNotFoundError(f"no person CSV found in {zf.filename}: {zf.namelist()}")
+    return members
+
+
+def read_person_file(zip_path: Path, year: int) -> pd.DataFrame:
+    """Read every person part in a zip and keep the columns the design needs."""
+    parts = []
     with zipfile.ZipFile(zip_path) as zf:
-        if member not in zf.namelist():
-            raise FileNotFoundError(f"{member} not found in {zip_path}")
-        with zf.open(member) as f:
-            header = pd.read_csv(io.BytesIO(f.read()), nrows=0).columns
-    missing = [c for c in KEEP_COLUMNS if c not in header]
+        for member in person_members(zf):
+            with zf.open(member) as f:
+                parts.append(pd.read_csv(f, usecols=lambda c: c in KEEP_COLUMNS, dtype={"ST": str}))
+
+    df = pd.concat(parts, ignore_index=True)
+    missing = [c for c in KEEP_COLUMNS if c not in df.columns]
     if missing:
         raise KeyError(f"{year} {zip_path.name} is missing columns: {missing}")
-
-    with zipfile.ZipFile(zip_path) as zf, zf.open(member) as f:
-        df = pd.read_csv(f, usecols=KEEP_COLUMNS, dtype={"ST": str})
+    df = df[KEEP_COLUMNS]
     df.insert(0, "year", year)
     return df
 
@@ -122,7 +133,7 @@ def main() -> None:
     for year in YEARS:
         for abbr, fips in PILOT_STATES.items():
             zip_path = download(year, abbr)
-            frames.append(read_person_file(zip_path, fips, year))
+            frames.append(read_person_file(zip_path, year))
             print(f"[read] {year} {abbr}: {len(frames[-1])} person records")
 
     combined = pd.concat(frames, ignore_index=True)
