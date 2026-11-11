@@ -84,7 +84,7 @@ def main() -> None:
     no_replicates = summary.loc[~summary["has_replicate_weights"], ["year", "state"]]
     if not no_replicates.empty:
         print(f"\n[note] {len(no_replicates)} state-years without replicate weights (years: "
-              f"{sorted(no_replicates['year'].unique())})")
+              f"{sorted(int(y) for y in no_replicates['year'].unique())})")
 
 
 if __name__ == "__main__":

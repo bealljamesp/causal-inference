@@ -134,14 +134,15 @@ def read_person_file(zip_path: Path, year: int, abbr: str, fips: str) -> pd.Data
     with zipfile.ZipFile(zip_path) as zf:
         for member in person_members(zf):
             with zf.open(member) as f:
-                parts.append(
-                    pd.read_csv(
-                        f,
-                        usecols=lambda c: c in KEEP_COLUMNS,
-                        dtype={"ST": str},
-                        low_memory=False,
-                    )
+                # Older years use lowercase names (pwgtp1), so match case-insensitively.
+                part = pd.read_csv(
+                    f,
+                    usecols=lambda c: c.upper() in KEEP_COLUMNS,
+                    dtype={"ST": str},
+                    low_memory=False,
                 )
+                part.columns = part.columns.str.upper()
+                parts.append(part)
     df = pd.concat(parts, ignore_index=True)
 
     missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
