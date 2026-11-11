@@ -21,7 +21,14 @@ Expansion was a state-level decision. Some states adopted it in 2014 and others 
 - **Source:** American Community Survey (ACS) 1-year Public Use Microdata Sample (PUMS), 2008 to 2019, excluding 2020 (experimental release and collection disruption).
 - **Why 1-year PUMS and not 5-year:** 5-year files pool overlapping years, so adjacent periods share respondents. That breaks the independence DiD relies on. Individual-level microdata also let us restrict to the target population.
 - **Sample:** adults aged 19 to 64, with household income at or below 138% of the federal poverty line (the Medicaid expansion threshold). Income-to-poverty ratios are computed from household income and household size.
+- **Income:** use the `POVPIP` column (income-to-poverty ratio in percent) directly, rather than computing it from household income.
 - **Weights and standard errors:** use person weights for estimates and the ACS replicate weights for standard errors, since the ACS sampling design is not simple random sampling.
+
+## Sample coverage
+
+- The analysis covers the 50 states and DC, 2008 to 2019, except Wisconsin.
+- Wisconsin is excluded because its 2014 ACS file could not be downloaded from the Census site. 2014 is the first post-expansion year, so this gap falls exactly where the estimate is measured. Excluding Wisconsin from every year keeps the panel balanced. The leave-one-out robustness check shows whether the estimate depends on it.
+- The 2008 files have no replicate weights. Those state-years keep their point estimates, but their standard errors need a different method.
 
 ## Outcome
 
