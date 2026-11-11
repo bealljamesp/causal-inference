@@ -221,3 +221,6 @@ __marimo__/
 data/raw/pums/
 data/interim/
 data/output/
+
+# notes
+notes/
