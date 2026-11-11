@@ -133,7 +133,17 @@ def read_person_file(zip_path: Path, year: int) -> pd.DataFrame:
         for c in missing_replicate:
             df[c] = pd.NA
 
-    df = df[KEEP_COLUMNS]
+    df = df[KEEP_COLUMNS].copy()
+
+    # Some years store blank spaces in numeric fields, which makes pandas read the
+    # column as text. Coerce to numbers and report how many values became missing.
+    for col in ["AGEP", "HICOV", "POVPIP"] + REPLICATE_COLUMNS + ["PWGTP"]:
+        before_missing = df[col].isna().sum()
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+        new_missing = int(df[col].isna().sum() - before_missing)
+        if new_missing:
+            print(f"[clean] {year} {col}: {new_missing} non-numeric values set to missing")
+
     df.insert(0, "year", year)
     df["has_replicate_weights"] = not missing_replicate
     return df
