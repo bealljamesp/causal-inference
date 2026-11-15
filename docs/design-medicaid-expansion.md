@@ -60,7 +60,7 @@ Replace Post_t with event-time indicators (years relative to 2014) and plot the 
 
 ## Results (provisional)
 
-Status: estimates from the current pipeline. The treated and comparison lists are not yet verified against KFF or the CMS tracker, so treat these as provisional until that check is done.
+Status: estimates from the current pipeline. The treated and comparison lists match KFF's August 2026 status table. They have not yet been checked against the CMS tracker, so treat these as provisional until that check is done.
 
 **Sample.** 43 states: 27 treated (2014 expansion) and 16 comparison. ACS 1-year PUMS, 2008 to 2019 excluding 2020, Wisconsin excluded. Adults 19 to 64 with income-to-poverty ratio at or below 138%. The outcome is the weighted share of these adults with no coverage, so it runs from 0 to 1.
 
@@ -104,6 +104,11 @@ Status: estimates from the current pipeline. The treated and comparison lists ar
 
 ## Open questions
 
-- Confirm the 2014 expansion state list and its source.
-- Decide whether to use the Census Bureau's `pums` helper or a direct download of the microdata files.
-- Decide whether the first deliverable is the state-level panel (faster) or the full microdata model (stronger, more work).
+- Check the treated and comparison lists against the CMS expansion tracker. They already match KFF's August 2026 table, so this check is the last source to confirm.
+- Bootstrap the event-study coefficients. The wild cluster bootstrap currently covers only the DiD term. The state-year panel (`data/interim/`) is not in the repo, so this needs a rerun of the pipeline.
+
+## Settled
+
+- Expansion state list: matches KFF's August 2026 status table (2014 adopters plus DC as treated; 2020-and-later and never-expanded states as comparison; 2015–2019 adopters excluded).
+- Data source: direct download of ACS 1-year PUMS files from census.gov (`scripts/pull_acs_pums.py`).
+- First deliverable: the full microdata model, which is built, with the state-level panel as an input to it.
