@@ -6,7 +6,7 @@ The research design, data rules, and limitations are in [docs/design-medicaid-ex
 
 ## Headline result (provisional)
 
-Expansion states saw a 7.1 percentage point drop in the uninsured share among low-income adults, relative to non-expansion states (wild cluster bootstrap p = 0.0008). The treated and comparison state lists are still being verified against KFF and CMS. The design doc has the full results and robustness checks.
+Expansion states saw a 7.1 percentage point drop in the uninsured share among low-income adults, relative to non-expansion states (wild cluster bootstrap p = 0.0008). The treated and comparison state lists match KFF's August 2026 expansion table. The CMS tracker check is still open. The design doc has the full results and robustness checks.
 
 ## Requirements
 
