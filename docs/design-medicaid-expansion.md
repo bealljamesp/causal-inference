@@ -12,7 +12,7 @@ Expansion was a state-level decision. Some states adopted it in 2014 and others 
 
 ## Treatment and comparison
 
-- **Treated:** states that expanded Medicaid in 2014. The exact list must be verified against an official source (KFF or the CMS Medicaid expansion tracker) before any analysis. Record the source and date in the code.
+- **Treated:** states that expanded Medicaid in 2014. The list matches KFF's August 2026 expansion status table. The CMS Medicaid expansion tracker check is still pending. Record the source and date in the code (`scripts/event_study.py` already cites KFF).
 - **Comparison:** states that had not expanded by the end of the sample window.
 - **Excluded from the main analysis:** states that expanded in later years (for example, 2015 or after). They are a useful robustness check, not part of the main estimate, because their timing changes the treatment definition.
 
